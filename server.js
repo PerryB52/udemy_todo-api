@@ -16,10 +16,20 @@ app.get('/', function(req, res) {
 
 //GET Request /todos
 app.get('/todos', function(req, res){
-    res.json(todos); //todos array will be converted into json and sent back to caller
+
+    var queryParams = req.query;
+    var filteredTodos = todos;
+
+    if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'true'){
+        filteredTodos =  _.where(filteredTodos, {completed: true});
+    } else if(queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
+        filteredTodos =  _.where(filteredTodos, {completed: false});
+    }
+
+    res.json(filteredTodos); //todos array will be converted into json and sent back to caller
 });
 
-//GET individual todos GET /todos/:id
+//GET individual todos GET /todos/:id //can get completed by using query params
 app.get('/todos/:id', function(req, res){
     var todoId = parseInt(req.params.id, 10); //second argument is the base, change only if you use binary/hexa etc...
     var matchedTodo = _.findWhere(todos, {id: todoId});
