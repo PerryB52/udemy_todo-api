@@ -14,7 +14,7 @@ app.get('/', function(req, res) {
     res.send('Todo api Root');
 });
 
-//GET Request /todos
+//GET Request /todos //can get completed by using query params
 app.get('/todos', function(req, res){
 
     var queryParams = req.query;
@@ -26,10 +26,16 @@ app.get('/todos', function(req, res){
         filteredTodos =  _.where(filteredTodos, {completed: false});
     }
 
+    if(queryParams.hasOwnProperty('q') && queryParams.q.length > 0){
+        filteredTodos = _.filter(filteredTodos, function(todo){
+            return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
+        });
+    }
+
     res.json(filteredTodos); //todos array will be converted into json and sent back to caller
 });
 
-//GET individual todos GET /todos/:id //can get completed by using query params
+//GET individual todos GET /todos/:id
 app.get('/todos/:id', function(req, res){
     var todoId = parseInt(req.params.id, 10); //second argument is the base, change only if you use binary/hexa etc...
     var matchedTodo = _.findWhere(todos, {id: todoId});
