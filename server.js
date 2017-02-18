@@ -73,6 +73,44 @@ app.delete('/todos/:id', function(req, res){
 });
 
 
+// PUT=update // PUT /todos/:id
+app.put('/todos/:id', function(req, res){
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+
+    var body = _.pick(req.body, 'description', 'completed');
+    var validAttributes = {};
+
+    if(!matchedTodo){
+        return res.status(400).send();
+    }
+
+    //first if runs = property exists and it is a boolean
+    if(body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+        validAttributes.completed = body.completed;
+    } else if (body.hasOwnProperty('completed')){
+        // bad = property existsbut it is not a boolean
+        return res.status(400).send();
+    } else {
+        //Never provided attribute, no problem here
+    }
+
+        //first if runs = property exists and it is a boolean
+    if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0){
+        validAttributes.description = body.description;
+    } else if (body.hasOwnProperty('description')){
+        // bad = property existsbut it is not a boolean
+        return res.status(400).send();
+    }
+
+    _.extend(matchedTodo, validAttributes); // updates matchedTodo //no need to update the array as in javascript arrays hold reffrences to objects
+
+    res.json(matchedTodo);
+
+
+});
+
+
 app.listen(PORT, function(){
     console.log('Express listening on port ' + PORT + '!');
 });
