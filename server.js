@@ -42,15 +42,27 @@ app.get('/todos', function(req, res) {
 //GET individual todos GET /todos/:id
 app.get('/todos/:id', function(req, res) {
     var todoId = parseInt(req.params.id, 10); //second argument is the base, change only if you use binary/hexa etc...
-    var matchedTodo = _.findWhere(todos, {
-        id: todoId
+
+    db.todo.findById(todoId).then(function(todo){
+        if(!!todo){
+            res.json(todo.toJSON());
+        } else {
+            res.status(404).send();
+        }
+    }, function(e){
+        res.status(500).send();
     });
 
-    if (matchedTodo) {
-        res.json(matchedTodo);
-    } else {
-        res.status(404).send();
-    }
+
+    // var matchedTodo = _.findWhere(todos, {
+    //     id: todoId
+    // });
+
+    // if (matchedTodo) {
+    //     res.json(matchedTodo);
+    // } else {
+    //     res.status(404).send();
+    // }
 
 });
 
