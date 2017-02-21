@@ -2,14 +2,15 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore'); //usualy people set underscore like this
+var db = require('./db.js');
+
 var app = express();
 var PORT = process.env.PORT || 3000;
-
 var todoNextId = 1;
 var todos = [];
 
 app.use(bodyParser.json());
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.send('Todo API Root');
 });
 
@@ -59,23 +60,29 @@ app.post('/todos', function(req, res) {
     //currently this function receives the json inputed from postman and shows it in postman
     var body = _.pick(req.body, 'description', 'completed'); //user _.pick to only pic description and completed
 
-    if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
+    db.todo.create(body).then(function(todo){
+        res.json(todo.toJSON());
+    }, function(e){
+        res.status(400).json(e);
+    });
 
-        return res.status(404).send();
-    }
+    // if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
 
-    //set body.description to trimmed value
-    body.description = body.description.trim();
+    //     return res.status(404).send();
+    // }
 
-    //add id
-    body.id = todoNextId++;
-    //todoNextId++;
+    // //set body.description to trimmed value
+    // body.description = body.description.trim();
 
-    //push
-    todos.push(body);
+    // //add id
+    // body.id = todoNextId++;
+    // //todoNextId++;
 
-    // //console.log('description: ' + body.description);
-    res.json(body);
+    // //push
+    // todos.push(body);
+
+    // // //console.log('description: ' + body.description);
+    // res.json(body);
 });
 
 //DELETE  /todos/:id - delete http method - deletes
@@ -137,7 +144,8 @@ app.put('/todos/:id', function(req, res) {
 
 });
 
-
-app.listen(PORT, function() {
-    console.log('Express listening on port ' + PORT + '!');
-});
+db.sequelize.sync().then(function() {
+    app.listen(PORT, function() {
+        console.log('Express listening on port ' + PORT + '!');
+    });
+})
